@@ -1,11 +1,7 @@
 # Download a specified path and save it to an S3 bucket
 
 # Thanks to
-# https://stackoverflow.com/a/47736376
-# https://stackoverflow.com/a/32490661
 # https://towardsdatascience.com/serverless-functions-and-using-aws-lambda-with-s3-buckets-8c174fd066a1
-# https://stackoverflow.com/a/42254534
-# https://stackoverflow.com/a/59185523
 
 import os
 import json
@@ -26,6 +22,7 @@ FILENAME = os.environ["destination_file"]
 
 
 def generate_bucket_filename():
+    # Thanks to https://stackoverflow.com/a/32490661
     date = datetime.today().strftime("%Y-%m-%d")
     folder = FOLDER
     filename = FILENAME
@@ -37,16 +34,15 @@ def generate_tmp_filename():
     return f"/tmp/{filename}"
 
 
-# Thanks to https://stackoverflow.com/a/7244263/756641
-
-
 def download_to_filename(url, file_name):
+    # Thanks to https://stackoverflow.com/a/7244263/756641
     # Download the file from `url` and save it locally under `file_name`:
     with urllib.request.urlopen(url) as response, open(file_name, "wb") as out_file:
         shutil.copyfileobj(response, out_file)
 
 
 def upload_to_s3(local_file, bucket, key):
+    # Thanks to https://stackoverflow.com/a/42254534
     s3 = boto3.resource("s3")
     try:
         s3.meta.client.upload_file(local_file, bucket, key)
@@ -71,6 +67,7 @@ def download_and_upload():
     upload_to_s3(generate_tmp_filename(), bucket, key)
 
     # Delete the local file
+    # Thanks to https://stackoverflow.com/a/59185523
     local_file.unlink(missing_ok=True)
 
 
