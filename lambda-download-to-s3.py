@@ -42,6 +42,14 @@ def download_to_filename(url, file_name):
     with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
 
+def upload_to_s3(local_file, bucket, key):
+    s3 = boto3.resource('s3')
+    try:
+        s3.meta.client.upload_file(local_file, bucket, key)
+    except ClientError as e:
+        logging.error(e)
+        return False
+    return True
 
 def download_and_upload():
     url = URL  # put your url here
@@ -49,7 +57,7 @@ def download_and_upload():
     key = generate_bucket_filename()  # your desired s3 path or filename
     local_file = Path(generate_tmp_filename())
 
-    s3 = boto3.resource('s3')
+    
 
     print(f'Downloading from {url}')
     
@@ -57,13 +65,10 @@ def download_and_upload():
 
     print(f'Saving to bucket: {bucket} in {key}')
 
-    try:
-        s3.meta.client.upload_file(generate_tmp_filename(), bucket, key)
-        local_file.unlink(missing_ok=True)
-    except ClientError as e:
-        logging.error(e)
-        return False
-    return True
+    upload_to_s3(generate_tmp_filename(), bucket, key)
+    
+    # Delete the local file
+    local_file.unlink(missing_ok=True)
 
 def lambda_handler(event, context):
     try:
