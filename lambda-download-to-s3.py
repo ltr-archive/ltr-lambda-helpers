@@ -7,6 +7,7 @@
 
 # Attempt 2
 # https://stackoverflow.com/a/42254534
+# https://stackoverflow.com/a/59185523
 
 import os
 import json
@@ -15,6 +16,7 @@ import logging
 from botocore.exceptions import ClientError
 import urllib.request
 import shutil
+from pathlib import Path
 from datetime import datetime
 
 URL = os.environ['url']  # URL of the site to download, stored in the site environment variable
@@ -45,6 +47,7 @@ def download_and_upload():
     url = URL  # put your url here
     bucket = BUCKET  # your s3 bucket
     key = generate_bucket_filename()  # your desired s3 path or filename
+    local_file = Path(generate_tmp_filename())
 
     s3 = boto3.resource('s3')
 
@@ -56,6 +59,7 @@ def download_and_upload():
 
     try:
         s3.meta.client.upload_file(generate_tmp_filename(), bucket, key)
+        local_file.unlink(missing_ok=True)
     except ClientError as e:
         logging.error(e)
         return False
